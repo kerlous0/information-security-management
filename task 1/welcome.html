@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome</title>
+  </head>
+  <body>
+    <h2 id="welcomeMessage"></h2>
+
+    <script>
+      let username = localStorage.getItem("loggedInUser");
+      if (username) {
+        document.getElementById("welcomeMessage").textContent =
+          "Welcome " + username;
+      } else {
+        document.getElementById("welcomeMessage").textContent =
+          "No user logged in.";
+      }
+    </script>
+  </body>
+</html>
