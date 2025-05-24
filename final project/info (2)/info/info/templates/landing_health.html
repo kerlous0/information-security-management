@@ -1,0 +1,123 @@
+{% extends "base_health.html" %}
+{% block title %}Welcome to Secure Health{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 123, 255, 0.7), rgba(0, 86, 179, 0.7)), url('https://via.placeholder.com/1920x800.png?text=Secure+Medical+Background') no-repeat center center;
+        background-size: cover;
+        color: white;
+        padding: 6rem 0;
+        text-align: center;
+    }
+    .hero-section h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .hero-section p { font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.9; }
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+        background-color: rgba(0,123,255,0.1);
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .feature-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .feature-card:hover { transform: translateY(-10px); box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important; }
+</style>
+
+<div class="hero-section">
+    <div class="container">
+        <h1>Secure Health: Your Trusted Medical Platform</h1>
+        <p>A security-focused medical web application for managing appointments and records, designed for learning and ethical hacking exploration.</p>
+        <div>
+            <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg px-4 py-2 me-2">Get Started</a>
+            <a href="#features-health" class="btn btn-outline-light btn-lg px-4 py-2">Learn More</a>
+        </div>
+    </div>
+</div>
+
+<section id="features-health" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Core Features for Secure Health</h2>
+            <p class="text-muted fs-5">Built with security and education in mind.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card feature-card h-100 text-center p-4">
+                    <div class="feature-icon"><i class="fas fa-user-shield"></i></div>
+                    <h3 class="h5 fw-bold">Role-Based Access Control (RBAC)</h3>
+                    <p class="text-muted">Distinct roles (Admin, Doctor, Patient) with granular permissions at both application and database levels.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card feature-card h-100 text-center p-4">
+                    <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                    <h3 class="h5 fw-bold">Data Encryption</h3>
+                    <p class="text-muted">Sensitive medical data like diagnoses and notes are encrypted at rest using AES-256.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card feature-card h-100 text-center p-4">
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3 class="h5 fw-bold">Two-Factor Authentication (2FA)</h3>
+                    <p class="text-muted">Enhanced security for Doctors and Admins using Google Authenticator.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card feature-card h-100 text-center p-4">
+                    <div class="feature-icon"><i class="fas fa-shield-virus"></i></div>
+                    <h3 class="h5 fw-bold">Web Security Protections</h3>
+                    <p class="text-muted">Built-in defenses against SQL Injection, XSS, and other common web vulnerabilities.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card feature-card h-100 text-center p-4">
+                    <div class="feature-icon"><i class="fas fa-history"></i></div>
+                    <h3 class="h5 fw-bold">Comprehensive Audit Logging</h3>
+                    <p class="text-muted">Detailed, exportable logs for all critical system activities and data changes.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card feature-card h-100 text-center p-4">
+                    <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3 class="h5 fw-bold">Ethical Hacking Playground</h3>
+                    <p class="text-muted">A platform for students to apply and test their cybersecurity skills in a simulated environment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="fw-bold">A Learning Platform for Cybersecurity Students</h2>
+                <p class="text-muted fs-5">Secure Health is more than just a medical app; it's a hands-on learning tool. Students can explore real-world security implementations, understand vulnerabilities, and practice defensive and offensive security techniques.</p>
+                <ul class="list-unstyled fs-5">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Implement and test RBAC.</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Explore data encryption and key management.</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Understand and defend against common web attacks.</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Analyze audit logs for security incidents.</li>
+                </ul>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="https://via.placeholder.com/500x400.png?text=Cybersecurity+Education" class="img-fluid rounded shadow" alt="Cybersecurity Education">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="fw-bold">Ready to Explore Secure Health?</h2>
+        <p class="text-muted fs-5 mb-4">Sign up to experience the platform or dive into the code to learn more.</p>
+        <a href="{{ url_for('signup') }}" class="btn btn-success btn-lg px-5 py-3">Create an Account</a>
+        </div>
+</section>
+
+{% endblock %}

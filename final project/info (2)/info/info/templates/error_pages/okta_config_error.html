@@ -1,0 +1,21 @@
+{% extends "error_pages/error_base_health.html" %}
+
+{% block title %}Okta/Auth0 Configuration Error - Secure Health{% endblock %}
+
+{% block error_icon %}<i class="fas fa-tools text-warning"></i>{% endblock %}
+
+{% block error_code %}Config Error{% endblock %}
+
+{% block error_message %}Okta/Auth0 SSO Misconfiguration{% endblock %}
+
+{% block error_description %}
+The Single Sign-On (SSO) service via Okta/Auth0 is not correctly configured in this application.
+<p class="mt-3"><strong>System Administrators:</strong> Please check the application's environment variables (<code>OKTA_DOMAIN</code>, <code>OKTA_CLIENT_ID</code>, <code>OKTA_CLIENT_SECRET</code>) and the Okta/Auth0 application settings.</p>
+<p>Regular users: Please contact support and inform them about this issue.</p>
+{% if error_message and debug %}
+    <div class="alert alert-secondary small mt-3" style="max-width: 500px; margin:auto; text-align: left;">
+        <strong>Developer Debug Info:</strong><br>
+        {{ error_message }}
+    </div>
+{% endif %}
+{% endblock %}

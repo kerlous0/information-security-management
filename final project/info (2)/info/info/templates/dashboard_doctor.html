@@ -1,0 +1,143 @@
+{% extends "base_health.html" %}
+{% block title %}Doctor Dashboard - Secure Health{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Doctor Dashboard: Dr. {{ current_user.name }}</h1>
+    <p>Specialization: {{ current_user.specialization or 'Not specified' }}</p>
+    <hr>
+    <h2>Upcoming Appointments</h2>
+    {% if upcoming_appointments %}
+        <ul>
+        {% for appt in upcoming_appointments %}
+            <li>{{ appt.appointment_date.strftime('%Y-%m-%d %H:%M') }} with Patient {{ appt.patient.name }} (ID: {{appt.patient_id}}) - Reason: {{ appt.reason }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No upcoming appointments.</p>
+    {% endif %}
+    <a href="{{ url_for('list_appointments_doctor') }}" class="btn btn-info">View All My Appointments</a>
+    <a href="{{ url_for('list_doctor_patients') }}" class="btn btn-primary mt-3">View My Patients</a>
+
+    <!-- جدول المرضى المرتبطين بالدكتور -->
+    <div class="card mt-4">
+      <div class="card-header bg-success text-white">
+        <h3 class="mb-0">My Patients</h3>
+      </div>
+      <div class="card-body">
+        {% if assigned_patients and assigned_patients|length > 0 %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Patient ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for assignment in assigned_patients %}
+                <tr>
+                  <td>{{ assignment.patient.name }}</td>
+                  <td>{{ assignment.patient.email }}</td>
+                  <td>{{ assignment.patient.id }}</td>
+                  <td>
+                    <a href="{{ url_for('view_patient_records_doctor', patient_id=assignment.patient.id) }}" class="btn btn-info btn-sm">View File</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="alert alert-info">You have no assigned patients.</div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- JWT API Section -->
+    <div class="card mt-4 jwt-logout-only" style="display: none;">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">API Access (JWT)</h3>
+        </div>
+        <div class="card-body">
+            <p>You are logged in with JWT as: <span class="jwt-user-info font-weight-bold"></span></p>
+            <p>Use these API endpoints with your JWT token:</p>
+            
+            <div class="accordion" id="doctorApiAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingPatients">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePatients" aria-expanded="false" aria-controls="collapsePatients">
+                            Get My Patients
+                        </button>
+                    </h2>
+                    <div id="collapsePatients" class="accordion-collapse collapse" aria-labelledby="headingPatients" data-bs-parent="#doctorApiAccordion">
+                        <div class="accordion-body">
+                            <button class="btn btn-sm btn-outline-primary" id="getPatients">Fetch Patients</button>
+                            <pre class="mt-3 bg-light p-3 d-none" id="patientsResult"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingAppointments">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAppointments" aria-expanded="false" aria-controls="collapseAppointments">
+                            Get My Appointments
+                        </button>
+                    </h2>
+                    <div id="collapseAppointments" class="accordion-collapse collapse" aria-labelledby="headingAppointments" data-bs-parent="#doctorApiAccordion">
+                        <div class="accordion-body">
+                            <button class="btn btn-sm btn-outline-primary" id="getAppointments">Fetch Appointments</button>
+                            <pre class="mt-3 bg-light p-3 d-none" id="appointmentsResult"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button class="btn btn-danger jwt-logout-button">Logout from JWT</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only run if user is logged in with JWT
+        if (JWTAuth.isLoggedIn()) {
+            // Get patients button
+            const getPatientsBtn = document.getElementById('getPatients');
+            const patientsResult = document.getElementById('patientsResult');
+            
+            if (getPatientsBtn) {
+                getPatientsBtn.addEventListener('click', async function() {
+                    try {
+                        const result = await SecureHealthAPI.doctor.getPatients();
+                        patientsResult.textContent = JSON.stringify(result, null, 2);
+                        patientsResult.classList.remove('d-none');
+                    } catch (error) {
+                        patientsResult.textContent = 'Error: ' + error.message;
+                        patientsResult.classList.remove('d-none');
+                    }
+                });
+            }
+            
+            // Get appointments button
+            const getAppointmentsBtn = document.getElementById('getAppointments');
+            const appointmentsResult = document.getElementById('appointmentsResult');
+            
+            if (getAppointmentsBtn) {
+                getAppointmentsBtn.addEventListener('click', async function() {
+                    try {
+                        const result = await SecureHealthAPI.doctor.getAppointments();
+                        appointmentsResult.textContent = JSON.stringify(result, null, 2);
+                        appointmentsResult.classList.remove('d-none');
+                    } catch (error) {
+                        appointmentsResult.textContent = 'Error: ' + error.message;
+                        appointmentsResult.classList.remove('d-none');
+                    }
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}

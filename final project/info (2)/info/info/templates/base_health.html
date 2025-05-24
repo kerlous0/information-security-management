@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure Health{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; display: flex; flex-direction: column; min-height: 100vh; }
+        .navbar-brand i { color: #28a745; } /* Green for health */
+        .navbar { background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+        .nav-link { font-weight: 500; }
+        .nav-link.active { color: #0d6efd !important; }
+        .main-content { flex: 1; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        footer { background-color: #343a40; color: white; padding: 2rem 0; margin-top: auto; }
+        footer a { color: #adb5bd; } footer a:hover { color: white; }
+        .card { border: none; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .btn-success { background-color: #28a745; border-color: #28a745; }
+        /* Add more Secure Health specific styles here */
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('home') }}">
+                <i class="fas fa-heartbeat"></i> Secure Health
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavSecureHealth" aria-controls="navbarNavSecureHealth" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavSecureHealth">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        {% if current_user.role == 'patient' %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'list_appointments_patient' %}active{% endif %}" href="{{ url_for('list_appointments_patient') }}">
+                                     <i class="fas fa-calendar-check me-1"></i>My Appointments
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'view_my_medical_records' %}active{% endif %}" href="{{ url_for('view_my_medical_records') }}">
+                                    <i class="fas fa-file-medical me-1"></i>My Records
+                                </a>
+                            </li>
+                        {% elif current_user.role == 'doctor' %}
+                             <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'list_doctor_patients' %}active{% endif %}" href="{{ url_for('list_doctor_patients') }}">
+                                    <i class="fas fa-users me-1"></i>Patients
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.endpoint == 'list_appointments_doctor' %}active{% endif %}" href="{{ url_for('list_appointments_doctor') }}">
+                                     <i class="fas fa-calendar-alt me-1"></i>Appointments
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'my_profile' %}active{% endif %}" href="{{ url_for('my_profile') }}">
+                                <i class="fas fa-user-cog me-1"></i>Profile
+                            </a>
+                        </li>
+                        {% if current_user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint.startswith('admin_') %}active{% endif %}" href="{{ url_for('admin_users_list') }}">
+                                <i class="fas fa-user-shield me-1"></i>Admin Panel
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'login' %}active{% endif %}" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'signup' %}active{% endif %}" href="{{ url_for('signup') }}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mt-3" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p>&copy; {{ now.year }} Secure Health. A project for Cybersecurity Students.</p>
+            <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jwt-auth.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

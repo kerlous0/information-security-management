@@ -1,0 +1,72 @@
+{% extends "base_health.html" %}
+{% block title %}My Schedule - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Schedule</h1>
+        </div>
+
+    {% if appointments %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Your Appointments</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Date & Time</th>
+                            <th scope="col">Patient</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in appointments %}
+                        <tr>
+                            <td>{{ appt.appointment_date.strftime('%A, %B %d, %Y at %I:%M %p') }}</td>
+                            <td>
+                                {% if appt.patient %}
+                                    <a href="{{ url_for('view_patient_records_doctor', patient_id=appt.patient.id) }}">{{ appt.patient.name }}</a>
+                                    <br><small class="text-muted">{{ appt.patient.email }}</small>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ appt.reason or 'Not specified' }}</td>
+                            <td>
+                                {% if appt.status == 'scheduled' %}
+                                    <span class="badge bg-primary">Scheduled</span>
+                                {% elif appt.status == 'completed' %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif appt.status.startswith('cancelled') %}
+                                    <span class="badge bg-danger">{{ appt.status.replace('_', ' ').capitalize() }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ appt.status.replace('_', ' ').capitalize() }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ url_for('view_patient_records_doctor', patient_id=appt.patient_id) if appt.patient_id else '#' }}" class="btn btn-sm btn-outline-primary" title="View Patient Records">
+                                    <i class="fas fa-file-medical"></i> View Records
+                                </a>
+                                {% if appt.status == 'scheduled' and appt.appointment_date > now %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mt-4">
+        <h4 class="alert-heading"><i class="fas fa-info-circle me-2"></i>No Appointments Found</h4>
+        <p>You currently have no appointments scheduled in your calendar.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

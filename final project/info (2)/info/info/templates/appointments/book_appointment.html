@@ -1,0 +1,48 @@
+{% extends "base_health.html" %}
+{% block title %}Book Appointment - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Book a New Appointment</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('book_appointment') }}">
+                        <div class="mb-3">
+                            <label for="doctor_id" class="form-label">Select Doctor <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg" id="doctor_id" name="doctor_id" required>
+                                <option value="" disabled selected>Choose a doctor...</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor.id }}">Dr. {{ doctor.name }} ({{ doctor.specialization or 'General Medicine' }})</option>
+                                {% else %}
+                                <option value="" disabled>No doctors available at the moment.</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="appointment_date" class="form-label">Preferred Date and Time <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control form-control-lg" id="appointment_date" name="appointment_date" required
+                                   min="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+                            <div class="form-text">Please select a future date and time.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason for Appointment</label>
+                            <textarea class="form-control form-control-lg" id="reason" name="reason" rows="3" placeholder="Briefly describe the reason for your visit..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('list_appointments_patient') }}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-check-circle me-2"></i>Request Appointment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

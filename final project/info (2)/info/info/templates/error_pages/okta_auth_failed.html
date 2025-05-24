@@ -1,0 +1,27 @@
+{% extends "error_pages/error_base_health.html" %}
+
+{% block title %}Okta/Auth0 Authentication Error - Secure Health{% endblock %}
+
+{% block error_icon %}<i class="fab fa-keycdn text-danger"></i>{% endblock %}
+
+{% block error_code %}SSO Error{% endblock %}
+
+{% block error_message %}Okta/Auth0 Authentication Failed{% endblock %}
+
+{% block error_description %}
+There was a problem authenticating with your Okta/Auth0 provider.
+This could be due to:
+<ul class="text-start mx-auto mt-3 mb-3" style="max-width: 400px; font-size: 0.9rem;">
+    <li>Incorrect Okta/Auth0 application configuration settings in Secure Health.</li>
+    <li>Issues with your Okta/Auth0 account or session.</li>
+    <li>Network connectivity problems.</li>
+    <li>Mismatched callback URLs or client credentials.</li>
+</ul>
+<p>Please try logging in again. If the issue persists, contact your system administrator or IT support for assistance with your Okta/Auth0 account or the Secure Health integration.</p>
+{% if error_message and debug %}
+    <div class="alert alert-secondary small mt-3" style="max-width: 500px; margin:auto; text-align: left;">
+        <strong>Developer Debug Info:</strong><br>
+        {{ error_message }}
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base_health.html" %}
+{% block title %}My Appointments - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Appointments</h1>
+        <a href="{{ url_for('book_appointment') }}" class="btn btn-primary"><i class="fas fa-calendar-plus me-2"></i>Book New Appointment</a>
+    </div>
+
+    {% if appointments %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Appointment History & Upcoming</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for appt in appointments %}
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Dr. {{ appt.doctor.name }} ({{ appt.doctor.specialization or 'General' }})</h5>
+                    <small class="text-muted">{{ appt.appointment_date.strftime('%A, %b %d, %Y at %I:%M %p') }}</small>
+                </div>
+                <p class="mb-1"><strong>Reason:</strong> {{ appt.reason or 'Not specified' }}</p>
+                <p class="mb-1">
+                    <strong>Status:</strong>
+                    {% if appt.status == 'scheduled' %}
+                        <span class="badge bg-primary">Scheduled</span>
+                        {% if appt.appointment_date > now %}
+                            <form action="{{ url_for('cancel_appointment_patient', appointment_id=appt.id) }}" method="POST" class="d-inline ms-2" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                <button type="submit" class="btn btn-xs btn-outline-danger">Cancel</button>
+                            </form>
+                        {% endif %}
+                    {% elif appt.status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% elif appt.status == 'cancelled_by_patient' %}
+                        <span class="badge bg-danger">Cancelled by You</span>
+                    {% elif appt.status == 'cancelled_by_doctor' %}
+                        <span class="badge bg-warning text-dark">Cancelled by Doctor</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ appt.status.replace('_', ' ').capitalize() }}</span>
+                    {% endif %}
+                </p>
+                {% if appt.notes %}
+                <p class="mb-0 mt-2 p-2 bg-light border rounded"><small><strong>Notes:</strong> {{ appt.notes }}</small></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center">
+        <h4 class="alert-heading"><i class="fas fa-info-circle me-2"></i>No Appointments Yet!</h4>
+        <p>You currently have no scheduled or past appointments.</p>
+        <hr>
+        <p class="mb-0">Ready to schedule one? <a href="{{ url_for('book_appointment') }}" class="alert-link">Book a new appointment now</a>.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

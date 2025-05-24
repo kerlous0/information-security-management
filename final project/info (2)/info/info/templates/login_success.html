@@ -1,0 +1,51 @@
+{% extends "base_health.html" %}
+{% block title %}Login Successful - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h2 class="mb-0">Login Successful</h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="alert alert-success">
+                        <h4 class="alert-heading">Welcome, {{ user.name }}!</h4>
+                        <p>You have successfully logged in to Secure Health.</p>
+                        <p>Your JWT tokens for API access have been generated and stored securely.</p>
+                        <hr>
+                        <p class="mb-0">You will be redirected to your dashboard in a few seconds...</p>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get data from server-rendered JSON
+        var tokenData = JSON.parse('{{ token_data|tojson|safe }}');
+        
+        // Process tokens using the JWT authentication helper
+        if (typeof JWTAuth !== 'undefined' && JWTAuth.processTokens) {
+            JWTAuth.processTokens(
+                tokenData.accessToken,
+                tokenData.refreshToken,
+                tokenData.user
+            );
+        }
+        
+        // Redirect to dashboard after 3 seconds
+        setTimeout(function() {
+            window.location.href = "{{ url_for('dashboard') }}";
+        }, 3000);
+    });
+</script>
+{% endblock %}

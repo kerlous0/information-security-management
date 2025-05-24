@@ -1,0 +1,66 @@
+{% extends "admin/admin_base_health.html" %} {% block admin_title %}Database
+Permissions Management{% endblock %} {% block admin_content %}
+<div class="card shadow-sm">
+  <div class="card-header bg-warning text-dark py-3">
+    <h4 class="mb-0">
+      <i class="fas fa-database me-2"></i>Manage Database Permissions (DCL)
+    </h4>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-danger">
+      <h5 class="alert-heading">
+        <i class="fas fa-exclamation-triangle me-2"></i>Extreme Caution
+        Required!
+      </h5>
+      <p>
+        Modifying database permissions directly can have severe security
+        implications and may destabilize the application. This feature is for
+        educational purposes and advanced administrators only. Ensure you
+        understand the impact of these commands.
+      </p>
+      <p class="mb-0">
+        It's generally recommended to manage permissions through predefined
+        database roles configured by a DBA.
+      </p>
+    </div>
+
+    <!-- Link to Doctor-Patient Permissions -->
+    <div class="card mb-4 border-primary">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Doctor-Patient Permission Management</h5>
+      </div>
+      <div class="card-body">
+        <p>
+          To manage doctor-patient permissions, please visit the dedicated page:
+        </p>
+        <a
+          href="{{ url_for('manage_doctor_patient_permissions') }}"
+          class="btn btn-primary"
+        >
+          <i class="fas fa-user-md me-2"></i>Manage Doctor-Patient Permissions
+        </a>
+      </div>
+    </div>
+
+    <hr class="my-4" />
+    <h5 class="mb-3">Current Application Users (for reference)</h5>
+    <p class="small text-muted">
+      This list shows application users. Database users/roles must be managed
+      separately unless your application dynamically creates them (which is
+      complex and often not recommended for direct DCL via web UI).
+    </p>
+    <ul
+      class="list-group list-group-sm"
+      style="max-height: 200px; overflow-y: auto"
+    >
+      {% for user_acc in users %}
+      <li class="list-group-item">
+        {{ user_acc.email }} (Role: {{ user_acc.role }})
+      </li>
+      {% else %}
+      <li class="list-group-item">No application users found.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

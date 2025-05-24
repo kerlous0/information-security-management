@@ -1,0 +1,95 @@
+{% extends "admin/admin_base_health.html" %}
+{% block admin_title %}Okta/Auth0 Configuration Check{% endblock %}
+
+{% block admin_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+        <h4 class="mb-0"><i class="fab fa-keycdn me-2"></i>Okta/Auth0 Configuration Status</h4>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info small">
+            <i class="fas fa-info-circle me-1"></i>This page displays the current Okta/Auth0 configuration status. It is intended for administrators to diagnose SSO integration issues.
+        </div>
+
+        <h5 class="mt-4">Configuration Details</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <tbody>
+                    <tr>
+                        <th style="width: 30%;">Okta Domain (from .env)</th>
+                        <td>
+                            {% if config.okta_domain %}
+                                <span class="text-success"><i class="fas fa-check-circle me-1"></i></span> {{ config.okta_domain }}
+                            {% else %}
+                                <span class="text-danger"><i class="fas fa-times-circle me-1"></i></span> Not configured in environment variables.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Client ID (from .env)</th>
+                        <td>
+                            {% if config.client_id %}
+                                <span class="text-success"><i class="fas fa-check-circle me-1"></i></span> {{ config.client_id[:10] }}... (Masked)
+                            {% else %}
+                                <span class="text-danger"><i class="fas fa-times-circle me-1"></i></span> Not configured.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Client Secret (from .env)</th>
+                        <td>
+                            {% if config.client_secret_set %} <span class="text-success"><i class="fas fa-check-circle me-1"></i></span> Set (Value not displayed for security)
+                            {% else %}
+                                <span class="text-danger"><i class="fas fa-times-circle me-1"></i></span> Not configured.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Server Metadata URL (Derived)</th>
+                         <td><code>{{ config.server_metadata_url_used }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Server Metadata Fetched</th>
+                        <td>
+                            {% if config.server_metadata_available %}
+                                <span class="text-success"><i class="fas fa-check-circle me-1"></i></span> Successfully fetched and available.
+                            {% else %}
+                                <span class="text-danger"><i class="fas fa-times-circle me-1"></i></span> Not available or failed to fetch. Check Okta Domain and connectivity.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Overall SSO Status</th>
+                        <td>
+                            {% if config.overall_status %}
+                                <span class="badge bg-success fs-6"><i class="fas fa-check-double me-1"></i>Ready for Okta/Auth0 Login</span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6"><i class="fas fa-exclamation-triangle me-1"></i>Not Ready / Configuration Issues</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        {% if config.server_metadata_json and config.server_metadata_available %}
+        <h5 class="mt-4">Fetched Server Metadata (OpenID Configuration)</h5>
+        <div class="alert alert-secondary small">
+            <pre class="mb-0" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">{{ config.server_metadata_json }}</pre>
+        </div>
+        {% elif not config.server_metadata_available and config.okta_domain %}
+         <div class="alert alert-warning small">
+            Could not fetch server metadata. Please verify your OKTA_DOMAIN (<code>{{config.okta_domain}}</code>) is correct and that the server can reach it. The expected metadata URL is <code>{{config.server_metadata_url_used}}</code>.
+        </div>
+        {% endif %}
+
+        <h5 class="mt-4">Troubleshooting Tips</h5>
+        <ul class="list-group list-group-flush small">
+            <li class="list-group-item">Ensure `OKTA_DOMAIN`, `OKTA_CLIENT_ID`, and `OKTA_CLIENT_SECRET` are correctly set in your `.env` file.</li>
+            <li class="list-group-item">Verify the application settings in your Okta/Auth0 dashboard, including allowed callback URIs. The callback URI for this app would be similar to: `{{ url_for('okta_authorize_callback', _external=True) }}`.</li>
+            <li class="list-group-item">Check network connectivity between this server and your Okta/Auth0 domain.</li>
+            <li class="list-group-item">Restart the application after any configuration changes.</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

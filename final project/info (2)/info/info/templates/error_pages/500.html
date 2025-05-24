@@ -1,0 +1,15 @@
+{% extends "error_pages/error_base_health.html" %}
+
+{% block title %}500 Internal Server Error - Secure Health{% endblock %}
+
+{% block error_icon %}<i class="fas fa-cogs text-muted"></i>{% endblock %}
+
+{% block error_code %}500{% endblock %}
+
+{% block error_message %}Internal Server Error{% endblock %}
+
+{% block error_description %}
+We're sorry, something went wrong on our end. Our technical team has been notified.
+Please try refreshing the page in a few moments or contact support if the problem persists.
+{% if error %}<p class="small text-muted mt-3">Error details: {{ error }}</p>{% endif %}
+{% endblock %}

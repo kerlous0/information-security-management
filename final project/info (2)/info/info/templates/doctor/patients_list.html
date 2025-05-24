@@ -1,0 +1,26 @@
+{% extends "base_health.html" %}
+{% block title %}My Patients - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>My Patients</h1>
+    <p class="lead">List of patients you are overseeing.</p>
+    <hr>
+    {% if patients %}
+        <div class="list-group">
+            {% for patient in patients %}
+            <a href="{{ url_for('view_patient_records_doctor', patient_id=patient.id) }}" class="list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ patient.name }}</h5>
+                    <small class="text-muted">Patient ID: {{ patient.id }}</small>
+                </div>
+                <p class="mb-1">Email: {{ patient.email }}</p>
+                <small>Contact: {{ patient.contact_details or 'Not provided' }}</small>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">You currently have no patients assigned or there are no patients in the system.</div>
+    {% endif %}
+</div>
+{% endblock %}

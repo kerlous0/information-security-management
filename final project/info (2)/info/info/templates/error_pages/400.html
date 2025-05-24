@@ -1,0 +1,14 @@
+{% extends "error_pages/error_base_health.html" %}
+
+{% block title %}400 Bad Request - Secure Health{% endblock %}
+
+{% block error_icon %}<i class="fas fa-exclamation-circle text-warning"></i>{% endblock %}
+
+{% block error_code %}400{% endblock %}
+
+{% block error_message %}Bad Request{% endblock %}
+
+{% block error_description %}
+The server could not understand your request due to invalid syntax or missing parameters.
+Please check your request and try again. If the problem persists, please contact support.
+{% endblock %}

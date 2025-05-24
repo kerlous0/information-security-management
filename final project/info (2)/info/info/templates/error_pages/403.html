@@ -1,0 +1,14 @@
+{% extends "error_pages/error_base_health.html" %}
+
+{% block title %}403 Forbidden - Secure Health{% endblock %}
+
+{% block error_icon %}<i class="fas fa-ban text-danger"></i>{% endblock %}
+
+{% block error_code %}403{% endblock %}
+
+{% block error_message %}Access Forbidden{% endblock %}
+
+{% block error_description %}
+You do not have the necessary permissions to access this page or resource.
+If you believe this is an error, please contact your system administrator.
+{% endblock %}

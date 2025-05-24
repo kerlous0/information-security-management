@@ -1,0 +1,118 @@
+{% extends "admin/admin_base_health.html" %}
+{% block admin_title %}System Audit Logs{% endblock %}
+
+{% block admin_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center flex-wrap">
+        <h4 class="mb-0 me-3"><i class="fas fa-clipboard-list me-2"></i>System Audit Logs</h4>
+        <a href="{{ url_for('export_audit_logs') }}" class="btn btn-sm btn-outline-secondary mt-2 mt-md-0">
+            <i class="fas fa-download me-1"></i>Export Logs (CSV)
+        </a>
+    </div>
+    <div class="card-body">
+        <p class="text-muted small">
+            Detailed logs of system activities including logins, data modifications, and administrative actions.
+        </p>
+
+        {% if logs_pagination and logs_pagination.items %}
+        <div class="table-responsive mt-3">
+            <table class="table table-sm table-striped table-hover table-bordered" style="font-size: 0.85rem;">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col" class="text-nowrap">Timestamp (UTC)</th>
+                        <th scope="col">Actor</th>
+                        <th scope="col">Action</th>
+                        <th scope="col">Target Type</th>
+                        <th scope="col">Target ID</th>
+                        <th scope="col">IP Address</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log_entry in logs_pagination.items %}
+                    <tr>
+                        <td class="text-nowrap">{{ log_entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if log_entry.actor %}
+                                <span title="User ID: {{ log_entry.user_id }}">{{ log_entry.actor.email }} ({{log_entry.actor.role}})</span>
+                            {% elif log_entry.user_id %}
+                                <span class="text-muted" title="User ID not found in users table">ID: {{ log_entry.user_id }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">System</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-info text-dark text-wrap" style="min-width: 100px;">{{ log_entry.action_type }}</span></td>
+                        <td> {% if log_entry.target_user_id %}User
+                            {% elif log_entry.target_medical_record_id %}Medical Record
+                            {% elif log_entry.target_appointment_id %}Appointment
+                            {% elif log_entry.target_prescription_id %}Prescription
+                            {% else %}-{% endif %}
+                        </td>
+                        <td> {{ log_entry.target_user_id or log_entry.target_medical_record_id or log_entry.target_appointment_id or log_entry.target_prescription_id or '-'}}
+                        </td>
+                        <td>{{ log_entry.ip_address or '-' }}</td>
+                        <td class="text-center">
+                            {% if log_entry.status_code %}
+                                <span class="badge
+                                    {% if log_entry.status_code >= 200 and log_entry.status_code < 300 %}bg-success
+                                    {% elif log_entry.status_code >= 400 and log_entry.status_code < 500 %}bg-warning text-dark
+                                    {% elif log_entry.status_code >= 500 %}bg-danger
+                                    {% else %}bg-secondary
+                                    {% endif %}">{{ log_entry.status_code }}</span>
+                            {% else %} <span class="text-muted">-</span> {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if log_entry.details and log_entry.details != 'null' %}
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-1" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#details-{{ log_entry.id }}"
+                                        aria-expanded="false"
+                                        aria-controls="details-{{ log_entry.id }}">
+                                    <small>View</small>
+                                </button>
+                                <div class="collapse mt-1 bg-light border p-2 shadow-sm position-absolute" id="details-{{ log_entry.id }}" style="text-align: left; min-width: 300px; max-width: 500px; z-index: 100;">
+                                    <pre style="max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; font-size: 0.75rem;"><code>{{ log_entry.details }}</code></pre>
+                                </div>
+                            {% else %} <span class="text-muted">-</span> {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Pagination - Copied from original, should work if logs_pagination is passed correctly #}
+        {% if logs_pagination.pages > 1 %}
+        <nav aria-label="Audit Log Pagination" class="mt-4 pt-3 border-top">
+            <ul class="pagination justify-content-center flex-wrap">
+                <li class="page-item {% if not logs_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_audit_logs_view', page=logs_pagination.prev_num) if logs_pagination.has_prev else '#' }}" tabindex="-1" aria-disabled="true">&laquo; Prev</a>
+                </li>
+                {% for page_num in logs_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if logs_pagination.page == page_num %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('admin_audit_logs_view', page=page_num) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% else %} <li class="page-item disabled"><span class="page-link">...</span></li> {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not logs_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_audit_logs_view', page=logs_pagination.next_num) if logs_pagination.has_next else '#' }}">Next &raquo;</a>
+                </li>
+            </ul>
+            <p class="text-center text-muted small">
+                Page {{ logs_pagination.page }} of {{ logs_pagination.pages }} (Total logs: {{ logs_pagination.total }})
+            </p>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-info mt-3 text-center py-4">
+            <h5 class="alert-heading">No Audit Logs</h5>
+            <p>There are no audit log entries to display currently.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

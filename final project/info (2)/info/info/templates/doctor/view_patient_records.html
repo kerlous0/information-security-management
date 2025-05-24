@@ -1,0 +1,82 @@
+{% extends "base_health.html" %}
+{% block title %}Records for {{ patient.name }} - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Medical Records: {{ patient.name }}</h1>
+        <div>
+            <a href="{{ url_for('add_medical_record', patient_id=patient.id) }}" class="btn btn-success me-2"><i class="fas fa-plus-circle me-2"></i>Add New Record</a>
+            <a href="{{ url_for('add_prescription', patient_id=patient.id) }}" class="btn btn-info"><i class="fas fa-prescription me-2"></i>Add Prescription</a>
+        </div>
+    </div>
+    <p class="lead">Patient ID: {{ patient.id }} | Email: {{ patient.email }}</p>
+    <hr>
+
+    <h3 class="mt-4">Records</h3>
+    {% if records %}
+        <div class="accordion" id="patientMedicalRecordsAccordion">
+            {% for record in records %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingPatientRecord{{ record.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePatientRecord{{ record.id }}" aria-expanded="false" aria-controls="collapsePatientRecord{{ record.id }}">
+                        <strong>{{ record.record_type.replace('_', ' ').capitalize() }}</strong> - {{ record.created_at.strftime('%B %d, %Y') }}
+                        {% if record.is_signed %}
+                            <span class="badge bg-success ms-2"><i class="fas fa-check-circle"></i> Signed</span>
+                        {% endif %}
+                    </button>
+                </h2>
+                <div id="collapsePatientRecord{{ record.id }}" class="accordion-collapse collapse" aria-labelledby="headingPatientRecord{{ record.id }}" data-bs-parent="#patientMedicalRecordsAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Description:</strong> {{ record.description or 'N/A' }}</p>
+                        {% if record.original_filename %}
+                             <p><strong>Attached File:</strong> <a href="{{ url_for('serve_medical_file', filename=record.saved_filename) }}" target="_blank">{{ record.original_filename }}</a></p>
+                        {% endif %}
+                        {% if record.sensitive_data %}
+                            <div class="card bg-light-subtle mt-2">
+                                <div class="card-body">
+                                    <h6 class="card-title text-danger"><i class="fas fa-lock me-1"></i>Sensitive Information (Encrypted in DB)</h6>
+                                    <pre class="card-text" style="white-space: pre-wrap;">{{ record.sensitive_data }}</pre>
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if record.is_signed %}
+                             <p class="mt-2"><small>Signed by you on {{ record.signed_at.strftime('%Y-%m-%d %H:%M') if record.signed_at else 'N/A' }}</small></p>
+                        {% else %}
+                            <p class="mt-2"><small class="text-warning">This record is not yet digitally signed.</small></p>
+                            {% endif %}
+                        </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">No medical records found for {{ patient.name }}.</div>
+    {% endif %}
+
+    <h3 class="mt-5">Prescriptions</h3>
+    {% if prescriptions %}
+        <ul class="list-group">
+        {% for prescr in prescriptions %}
+            <li class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ prescr.medication_name }}</h5>
+                    <small>Prescribed: {{ prescr.start_date.strftime('%Y-%m-%d') }}</small>
+                </div>
+                <p class="mb-1">Dosage: {{ prescr.dosage }}, Frequency: {{ prescr.frequency }}</p>
+                {% if prescr.is_signed %}
+                    <small class="text-success"><i class="fas fa-check-circle"></i> Signed by you on {{ prescr.signed_at.strftime('%Y-%m-%d %H:%M') if prescr.signed_at else 'N/A' }}</small>
+                {% else %}
+                    <small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Not yet signed.</small>
+                    {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-info">No prescriptions found for {{ patient.name }}.</div>
+    {% endif %}
+     <div class="mt-4">
+        <a href="{{ url_for('list_doctor_patients') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back to Patients List</a>
+    </div>
+</div>
+{% endblock %}

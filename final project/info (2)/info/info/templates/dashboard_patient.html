@@ -1,0 +1,229 @@
+{% extends "base_health.html" %}
+{% block title %}Patient Dashboard - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Welcome, {{ current_user.name }}! (Patient)</h1>
+        <a href="{{ url_for('book_appointment') }}" class="btn btn-primary"><i class="fas fa-calendar-plus me-2"></i>Book New Appointment</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Upcoming Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if my_upcoming_appointments %}
+                        <ul class="list-group list-group-flush">
+                        {% for appt in my_upcoming_appointments %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ appt.appointment_date.strftime('%A, %B %d, %Y at %I:%M %p') }}</strong><br>
+                                    With: Dr. {{ appt.doctor.name }} ({{ appt.doctor.specialization or 'General' }})<br>
+                                    <small class="text-muted">Reason: {{ appt.reason or 'Not specified' }}</small>
+                                </div>
+                                <form action="{{ url_for('cancel_appointment_patient', appointment_id=appt.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">You have no upcoming appointments.</p>
+                    {% endif %}
+                    <div class="mt-3">
+                        <a href="{{ url_for('list_appointments_patient') }}" class="btn btn-outline-primary btn-sm">View All Appointments</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-prescription-bottle-alt me-2"></i>Recent Prescriptions</h5>
+                </div>
+                <div class="card-body">
+                    {% if my_recent_prescriptions %}
+                        <ul class="list-group list-group-flush">
+                        {% for prescr in my_recent_prescriptions %}
+                            <li class="list-group-item">
+                                <strong>{{ prescr.medication_name }}</strong> - {{ prescr.dosage }} ({{ prescr.frequency }})<br>
+                                <small class="text-muted">Prescribed by Dr. {{ prescr.prescribing_doctor.name }} on {{ prescr.start_date.strftime('%B %d, %Y') }}</small>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">You have no recent prescriptions.</p>
+                    {% endif %}
+                     <div class="mt-3">
+                        <a href="{{ url_for('view_my_medical_records') }}" class="btn btn-outline-success btn-sm">View All Prescriptions & Records</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 mt-4">
+            <div class="card">
+                 <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body text-center">
+                    <a href="{{ url_for('view_my_medical_records') }}" class="btn btn-lg btn-outline-primary m-2"><i class="fas fa-notes-medical me-2"></i>View Full Medical History</a>
+                    <a href="{{ url_for('my_profile') }}" class="btn btn-lg btn-outline-secondary m-2"><i class="fas fa-user-edit me-2"></i>Edit Profile</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- JWT API Section -->
+        <div class="col-12 mt-4 jwt-logout-only" style="display: none;">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-key me-2"></i>API Access (JWT)</h5>
+                </div>
+                <div class="card-body">
+                    <p>You are logged in with JWT as: <span class="jwt-user-info font-weight-bold"></span></p>
+                    <p>Use these API endpoints with your JWT token:</p>
+                    
+                    <div class="accordion" id="patientApiAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingRecords">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecords" aria-expanded="false" aria-controls="collapseRecords">
+                                    Get My Medical Records
+                                </button>
+                            </h2>
+                            <div id="collapseRecords" class="accordion-collapse collapse" aria-labelledby="headingRecords" data-bs-parent="#patientApiAccordion">
+                                <div class="accordion-body">
+                                    <button class="btn btn-sm btn-outline-primary" id="getMedicalRecords">Fetch Records</button>
+                                    <pre class="mt-3 bg-light p-3 d-none" id="recordsResult"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingPatientAppointments">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePatientAppointments" aria-expanded="false" aria-controls="collapsePatientAppointments">
+                                    Get My Appointments
+                                </button>
+                            </h2>
+                            <div id="collapsePatientAppointments" class="accordion-collapse collapse" aria-labelledby="headingPatientAppointments" data-bs-parent="#patientApiAccordion">
+                                <div class="accordion-body">
+                                    <button class="btn btn-sm btn-outline-primary" id="getPatientAppointments">Fetch Appointments</button>
+                                    <pre class="mt-3 bg-light p-3 d-none" id="patientAppointmentsResult"></pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingBookAppointment">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBookAppointment" aria-expanded="false" aria-controls="collapseBookAppointment">
+                                    Book New Appointment via API
+                                </button>
+                            </h2>
+                            <div id="collapseBookAppointment" class="accordion-collapse collapse" aria-labelledby="headingBookAppointment" data-bs-parent="#patientApiAccordion">
+                                <div class="accordion-body">
+                                    <form id="apiBookAppointmentForm">
+                                        <div class="mb-3">
+                                            <label for="doctorId" class="form-label">Doctor ID</label>
+                                            <input type="number" class="form-control" id="doctorId" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="appointmentDate" class="form-label">Appointment Date</label>
+                                            <input type="datetime-local" class="form-control" id="appointmentDate" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="appointmentReason" class="form-label">Reason</label>
+                                            <textarea class="form-control" id="appointmentReason" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Book Appointment</button>
+                                    </form>
+                                    <pre class="mt-3 bg-light p-3 d-none" id="bookAppointmentResult"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-danger jwt-logout-button">Logout from JWT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only run if user is logged in with JWT
+        if (JWTAuth.isLoggedIn()) {
+            // Get medical records button
+            const getMedicalRecordsBtn = document.getElementById('getMedicalRecords');
+            const recordsResult = document.getElementById('recordsResult');
+            
+            if (getMedicalRecordsBtn) {
+                getMedicalRecordsBtn.addEventListener('click', async function() {
+                    try {
+                        const result = await SecureHealthAPI.patient.getMedicalRecords();
+                        recordsResult.textContent = JSON.stringify(result, null, 2);
+                        recordsResult.classList.remove('d-none');
+                    } catch (error) {
+                        recordsResult.textContent = 'Error: ' + error.message;
+                        recordsResult.classList.remove('d-none');
+                    }
+                });
+            }
+            
+            // Get appointments button
+            const getPatientAppointmentsBtn = document.getElementById('getPatientAppointments');
+            const patientAppointmentsResult = document.getElementById('patientAppointmentsResult');
+            
+            if (getPatientAppointmentsBtn) {
+                getPatientAppointmentsBtn.addEventListener('click', async function() {
+                    try {
+                        const result = await SecureHealthAPI.patient.getAppointments();
+                        patientAppointmentsResult.textContent = JSON.stringify(result, null, 2);
+                        patientAppointmentsResult.classList.remove('d-none');
+                    } catch (error) {
+                        patientAppointmentsResult.textContent = 'Error: ' + error.message;
+                        patientAppointmentsResult.classList.remove('d-none');
+                    }
+                });
+            }
+            
+            // Book appointment form
+            const apiBookAppointmentForm = document.getElementById('apiBookAppointmentForm');
+            const bookAppointmentResult = document.getElementById('bookAppointmentResult');
+            
+            if (apiBookAppointmentForm) {
+                apiBookAppointmentForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const doctorId = document.getElementById('doctorId').value;
+                    const appointmentDate = document.getElementById('appointmentDate').value;
+                    const reason = document.getElementById('appointmentReason').value;
+                    
+                    try {
+                        const result = await SecureHealthAPI.patient.bookAppointment({
+                            doctor_id: doctorId,
+                            appointment_date: new Date(appointmentDate).toISOString(),
+                            reason: reason
+                        });
+                        
+                        bookAppointmentResult.textContent = JSON.stringify(result, null, 2);
+                        bookAppointmentResult.classList.remove('d-none');
+                        
+                        if (result.message && result.message.includes('success')) {
+                            apiBookAppointmentForm.reset();
+                        }
+                    } catch (error) {
+                        bookAppointmentResult.textContent = 'Error: ' + error.message;
+                        bookAppointmentResult.classList.remove('d-none');
+                    }
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}

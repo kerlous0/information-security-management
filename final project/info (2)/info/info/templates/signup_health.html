@@ -1,0 +1,65 @@
+{% extends "base_health.html" %}
+{% block title %}Sign Up - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h2 class="mb-0">Create Your Secure Health Account</h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('signup') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control form-control-lg" id="name" name="name" value="{{ name if name else '' }}" required autocomplete="name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" value="{{ email if email else '' }}" required autocomplete="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" required minlength="8" autocomplete="new-password" aria-describedby="passwordHelpBlock">
+                            <div id="passwordHelpBlock" class="form-text mt-2">
+                                Your password must be at least 8 characters long and include:
+                                <ul class="mt-1 mb-0 small">
+                                    <li>At least one uppercase letter (A-Z)</li>
+                                    <li>At least one lowercase letter (a-z)</li>
+                                    <li>At least one digit (0-9)</li>
+                                    <li>At least one special character (e.g., !@#$%^&*)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control form-control-lg" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Register as:</label>
+                            <select class="form-select form-select-lg" id="role" name="role">
+                                <option value="patient" selected>Patient</option>
+                                <option value="doctor">Doctor (Requires Admin Approval)</option>
+                                </select>
+                            <div class="form-text small">Doctors and Admins require administrator approval after registration.</div>
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
+                        </div>
+                    </form>
+                    <hr class="my-4">
+                    <p class="text-center">Already have an account? <a href="{{ url_for('login') }}">Log In</a></p>
+                    {% if oauth.okta %} <p class="text-center mt-3 text-muted small">Or sign up using your corporate account (if applicable):</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('okta_login_redirect') }}" class="btn btn-info text-white btn-lg">
+                            <i class="fab fa-keycdn me-2"></i> Sign Up with Okta/Auth0
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

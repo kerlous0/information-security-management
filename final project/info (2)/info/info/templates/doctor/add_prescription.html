@@ -1,0 +1,64 @@
+{% extends "base_health.html" %}
+{% block title %}Add Prescription for {{ patient.name }} - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-prescription me-2"></i>Add New Prescription for {{ patient.name }}</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('add_prescription', patient_id=patient.id) }}">
+                        <div class="mb-3">
+                            <label for="medication_name" class="form-label">Medication Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg" id="medication_name" name="medication_name" required placeholder="e.g., Amoxicillin 250mg">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dosage" class="form-label">Dosage</label>
+                                <input type="text" class="form-control form-control-lg" id="dosage" name="dosage" placeholder="e.g., 1 tablet, 10ml">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="frequency" class="form-label">Frequency</label>
+                                <input type="text" class="form-control form-control-lg" id="frequency" name="frequency" placeholder="e.g., Twice a day, Every 6 hours">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control form-control-lg" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="end_date" class="form-label">End Date (Optional)</label>
+                                <input type="date" class="form-control form-control-lg" id="end_date" name="end_date">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Additional Notes/Instructions</label>
+                            <textarea class="form-control form-control-lg" id="notes" name="notes" rows="3" placeholder="e.g., Take with food, Avoid sunlight..."></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                             <input class="form-check-input" type="checkbox" id="sign_prescription_now" name="sign_prescription_now" value="on" checked disabled>
+                             <label class="form-check-label" for="sign_prescription_now">
+                                Digitally sign this prescription (Required for validity)
+                             </label>
+                         </div>
+
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('view_patient_records_doctor', patient_id=patient.id) }}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                            <button type="submit" class="btn btn-info btn-lg"><i class="fas fa-save me-2"></i>Save Prescription</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

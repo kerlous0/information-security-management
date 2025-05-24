@@ -1,0 +1,76 @@
+{% extends "base_health.html" %}
+{% block title %}My Medical Information - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>My Medical Information</h1>
+    <p class="lead">View your medical records and prescriptions.</p>
+    <hr>
+
+    <h2 class="mt-4 mb-3"><i class="fas fa-notes-medical me-2"></i>Medical Records</h2>
+    {% if records %}
+        <div class="accordion" id="medicalRecordsAccordion">
+            {% for record in records %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingRecord{{ record.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecord{{ record.id }}" aria-expanded="false" aria-controls="collapseRecord{{ record.id }}">
+                        <strong>{{ record.record_type.replace('_', ' ').capitalize() }}</strong> - {{ record.created_at.strftime('%B %d, %Y') }} (Dr. {{ record.doctor_name }})
+                    </button>
+                </h2>
+                <div id="collapseRecord{{ record.id }}" class="accordion-collapse collapse" aria-labelledby="headingRecord{{ record.id }}" data-bs-parent="#medicalRecordsAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Description:</strong> {{ record.description or 'N/A' }}</p>
+                        {% if record.original_filename %}
+                            <p><strong>Attached File:</strong> <a href="{{ url_for('serve_medical_file', filename=record.saved_filename) }}" target="_blank">{{ record.original_filename }}</a> <small>({{ record.filetype }}, {{ record.filesize // 1024 }} KB)</small></p>
+                        {% endif %}
+                        {% if record.sensitive_data_preview %}
+                            <div class="card bg-light mt-2">
+                                <div class="card-body">
+                                    <h6 class="card-title">Sensitive Details (Preview)</h6>
+                                    <p class="card-text small text-muted">{{ record.sensitive_data_preview }}</p>
+                                    <em><small class="text-info">Full sensitive data is encrypted and only viewable by authorized medical staff.</small></em>
+                                </div>
+                            </div>
+                        {% endif %}
+                         {% if record.is_signed %}
+                            <p class="mt-2"><small class="text-success"><i class="fas fa-check-circle"></i> Electronically signed by Dr. {{ record.attending_doctor.name if record.attending_doctor else 'N/A' }} on {{ record.signed_at.strftime('%Y-%m-%d %H:%M') if record.signed_at else 'N/A' }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">You have no medical records available at this time.</div>
+    {% endif %}
+
+    <h2 class="mt-5 mb-3"><i class="fas fa-prescription me-2"></i>Prescriptions</h2>
+    {% if prescriptions %}
+        <div class="list-group">
+            {% for prescr in prescriptions %}
+            <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ prescr.medication_name }}</h5>
+                    <small class="text-muted">Start Date: {{ prescr.start_date.strftime('%B %d, %Y') }}</small>
+                </div>
+                <p class="mb-1"><strong>Dosage:</strong> {{ prescr.dosage or 'N/A' }} | <strong>Frequency:</strong> {{ prescr.frequency or 'N/A' }}</p>
+                <p class="mb-1"><small><strong>Prescribed by:</strong> Dr. {{ prescr.prescribing_doctor.name }}</small></p>
+                {% if prescr.end_date %}
+                <p class="mb-1"><small><strong>End Date:</strong> {{ prescr.end_date.strftime('%B %d, %Y') }}</small></p>
+                {% endif %}
+                {% if prescr.notes %}
+                <p class="mb-1"><small><strong>Notes:</strong> {{ prescr.notes }}</small></p>
+                {% endif %}
+                 {% if prescr.is_signed %}
+                    <p class="mt-1 mb-0"><small class="text-success"><i class="fas fa-check-circle"></i> Signed on {{ prescr.signed_at.strftime('%Y-%m-%d %H:%M') if prescr.signed_at else 'N/A' }}</small></p>
+                {% else %}
+                    <p class="mt-1 mb-0"><small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Not yet signed</small></p>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">You have no prescriptions on file.</div>
+    {% endif %}
+</div>
+{% endblock %}

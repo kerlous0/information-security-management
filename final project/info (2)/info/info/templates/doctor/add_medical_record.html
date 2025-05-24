@@ -1,0 +1,77 @@
+{% extends "base_health.html" %}
+{% block title %}Add Medical Record for {{ patient.name }} - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-file-medical me-2"></i>Add New Medical Record for {{ patient.name }}</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('add_medical_record', patient_id=patient.id) }}" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="record_type" class="form-label">Record Type <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg" id="record_type" name="record_type" required>
+                                <option value="diagnosis">Diagnosis</option>
+                                <option value="treatment_note">Treatment Note</option>
+                                <option value="lab_report">Lab Report (Upload)</option>
+                                <option value="allergy">Allergy Information</option>
+                                <option value="observation">General Observation</option>
+                                <option value="procedure">Procedure Note</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">General Description/Summary</label>
+                            <textarea class="form-control form-control-lg" id="description" name="description" rows="3" placeholder="e.g., Follow-up visit, Initial consultation for cough..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sensitive_data_plain" class="form-label">Sensitive Details (e.g., Diagnosis, Detailed Notes)</label>
+                            <textarea class="form-control form-control-lg" id="sensitive_data_plain" name="sensitive_data_plain" rows="5" placeholder="This data will be encrypted..."></textarea>
+                            <div class="form-text text-danger"><i class="fas fa-lock me-1"></i>This field will be encrypted in the database.</div>
+                        </div>
+                        
+                        <div class="mb-3" id="labReportUploadSection" style="display: none;">
+                            <label for="lab_report_file" class="form-label">Upload Lab Report File</label>
+                            <input class="form-control form-control-lg" type="file" id="lab_report_file" name="lab_report_file">
+                            <div class="form-text">Allowed files: {{ ALLOWED_EXTENSIONS|join(', ') }}. Max size: {{ app.config.MAX_CONTENT_LENGTH // (1024*1024) }}MB.</div>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sign_now" name="sign_now" value="on">
+                            <label class="form-check-label" for="sign_now">
+                                Digitally sign this record now (Recommended)
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{{ url_for('view_patient_records_doctor', patient_id=patient.id) }}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-save me-2"></i>Save Record</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const recordTypeSelect = document.getElementById('record_type');
+        const labReportUploadSection = document.getElementById('labReportUploadSection');
+
+        function toggleLabReportUpload() {
+            if (recordTypeSelect.value === 'lab_report') {
+                labReportUploadSection.style.display = 'block';
+            } else {
+                labReportUploadSection.style.display = 'none';
+            }
+        }
+        recordTypeSelect.addEventListener('change', toggleLabReportUpload);
+        toggleLabReportUpload(); // Initial check
+    });
+</script>
+{% endblock %}

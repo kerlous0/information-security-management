@@ -1,0 +1,91 @@
+{% extends "base_health.html" %} {% block title %}Manage Doctor-Patient
+Permissions{% endblock %} {% block content %}
+<div class="container mt-4">
+  <h2>Manage Doctor-Patient Permissions</h2>
+  {% if message %}
+  <div class="alert alert-info">{{ message }}</div>
+  {% endif %}
+  <form
+    method="POST"
+    action="{{ url_for('manage_doctor_patient_permissions') }}"
+  >
+    <div class="row">
+      <div class="col-md-6">
+        <label for="doctor_id">Doctor Email</label>
+        <select class="form-control" name="doctor_id" required>
+          {% for doctor in doctors %}
+          <option value="{{ doctor.id }}">{{ doctor.email }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="patient_id">Patient Email</label>
+        <select class="form-control" name="patient_id" required>
+          {% for patient in patients %}
+          <option value="{{ patient.id }}">{{ patient.email }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="row mt-4">
+      <div class="col-md-12 text-center">
+        <button
+          type="submit"
+          name="action"
+          value="grant"
+          class="btn btn-success mx-2 px-4"
+        >
+          GRANT
+        </button>
+        <button
+          type="submit"
+          name="action"
+          value="revoke"
+          class="btn btn-danger mx-2 px-4"
+        >
+          REVOKE
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- جدول الصلاحيات الحالية -->
+<div class="container mt-5">
+  <h3>Current Doctor-Patient Permissions</h3>
+  {% if all_assignments and all_assignments|length > 0 %}
+  <table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+      <tr>
+        <th>Doctor Email</th>
+        <th>Doctor Name</th>
+        <th>Patient Email</th>
+        <th>Patient Name</th>
+        <th>Assigned By</th>
+        <th>Assigned At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for assignment in all_assignments %}
+      <tr>
+        <td>{{ assignment.doctor.email }}</td>
+        <td>{{ assignment.doctor.name }}</td>
+        <td>{{ assignment.patient.email }}</td>
+        <td>{{ assignment.patient.name }}</td>
+        <td>
+          {% if assignment.assigned_by_admin %} {{ assignment.assigned_by_admin
+          }} {% else %} -- {% endif %}
+        </td>
+        <td>
+          {{ assignment.assigned_at.strftime('%Y-%m-%d %H:%M') if
+          assignment.assigned_at else '--' }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="alert alert-info">No doctor-patient permissions found.</div>
+  {% endif %}
+</div>
+{% endblock %}

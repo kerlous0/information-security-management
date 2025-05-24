@@ -1,0 +1,106 @@
+{% extends "base_health.html" %}
+{% block title %}My Profile - Secure Health{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-7">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h2 class="mb-0"><i class="fas fa-user-circle me-2"></i>My Profile</h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('my_profile') }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label fs-5">Email Address</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" value="{{ current_user.email }}" readonly disabled>
+                            {% if current_user.oauth_provider %}
+                                <div class="form-text small mt-1">
+                                    Logged in via {{ current_user.oauth_provider.capitalize() }}. Email is managed by the provider.
+                                </div>
+                            {% else %}
+                                 <div class="form-text small mt-1">
+                                    Your email address is used for login and cannot be changed here.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label fs-5">Full Name</label>
+                            <input type="text" class="form-control form-control-lg" id="name" name="name" value="{{ current_user.name if current_user.name else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fs-5">Role</label>
+                            <input type="text" class="form-control form-control-lg" value="{{ current_user.role.capitalize() }}" readonly disabled>
+                        </div>
+
+                        {% if current_user.role == 'doctor' %}
+                        <div class="mb-3">
+                            <label for="specialization" class="form-label fs-5">Specialization</label>
+                            <input type="text" class="form-control form-control-lg" id="specialization" name="specialization" value="{{ current_user.specialization if current_user.specialization else '' }}">
+                        </div>
+                        {% endif %}
+
+                        {% if current_user.role == 'patient' %}
+                        <div class="mb-3">
+                            <label for="contact_details" class="form-label fs-5">Contact Details (Phone/Address)</label>
+                            <textarea class="form-control form-control-lg" id="contact_details" name="contact_details" rows="3">{{ current_user.contact_details if current_user.contact_details else '' }}</textarea>
+                        </div>
+                        {% endif %}
+
+                        <hr class="my-4">
+                        <h4 class="mb-3 fs-5 text-muted">Security Settings</h4>
+
+                        {% if not current_user.oauth_provider %}
+                        <div class="mb-4 p-3 bg-light rounded-3 border">
+                            <label class="form-label d-block fs-6 fw-bold">Change Password</label>
+                            <div class="mt-2">
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" autocomplete="current-password">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" autocomplete="new-password" aria-describedby="newPasswordHelp">
+                                    <div id="newPasswordHelp" class="form-text small">Min 8 chars, upper, lower, digit, special.</div>
+                                </div>
+                                <div class="mb-2">
+                                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" autocomplete="new-password">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if current_user.role in ['doctor', 'admin'] %}
+                        <div class="mb-4 p-3 bg-light rounded-3 border">
+                            <label class="form-label d-block fs-6 fw-bold">Two-Factor Authentication (2FA)</label>
+                            <div>
+                                {% if current_user.is_2fa_enabled %}
+                                    <span class="badge bg-success p-2 fs-6"><i class="fas fa-shield-alt me-1"></i>2FA Enabled</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark p-2 fs-6"><i class="fas fa-exclamation-triangle me-1"></i>2FA Disabled</span>
+                                    <a href="{{ url_for('setup_2fa') }}" class="btn btn-sm btn-outline-success ms-2 py-2">Enable 2FA Now</a>
+                                {% endif %}
+                                 <div class="form-text small mt-1">Enhance your account security with an authenticator app.</div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid mt-4 pt-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted text-center py-3">
+                    <small>Joined On: {{ current_user.created_at.strftime('%B %d, %Y - %H:%M UTC') if current_user.created_at else 'N/A' }}</small><br>
+                    <small>Last updated: {{ current_user.updated_at.strftime('%B %d, %Y - %H:%M UTC') if current_user.updated_at else 'N/A' }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
